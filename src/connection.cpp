@@ -21,7 +21,10 @@ void Connection::moveToNewThread()
     connectionThread = new QThread();
     connectionThread->start();
     this->moveToThread(connectionThread);
-    connect(this, &Connection::destroyed, connectionThread, &QThread::deleteLater);
+    connect(this, &Connection::destroyed, this, [this] {
+        connectionThread->quit();
+        connectionThread->deleteLater();
+    });
 }
 
 void Connection::onBinaryMessage(const QByteArray &message)
