@@ -6,11 +6,13 @@
 #include <QThread>
 #include <QPointer>
 
+#include "worker.h"
+
 class Connection : public QObject
 {
     Q_OBJECT
 public:
-    explicit Connection(QPointer<QWebSocket> socket, QObject *parent = nullptr);
+    explicit Connection(QPointer<QWebSocket> socket, Worker* worker, QObject *parent = nullptr);
 
 
 private slots:
@@ -19,8 +21,8 @@ private slots:
 private:
     void moveToNewThread();
 
-    QPointer<QThread> connectionThread;
     QPointer<QWebSocket> m_socket;
+    QPointer<Worker> m_worker;
 
 signals:
     void disconnected();

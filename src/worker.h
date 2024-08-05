@@ -14,6 +14,7 @@ public:
     QByteArray processRequest(QByteArray request);
 
 private:
+    QVariantMap methods;
 
 signals:
 };

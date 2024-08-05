@@ -17,15 +17,20 @@ enum RpcErrors
     NoError = 0
 };
 
-struct ErrorAnswer
+struct Answer
 {
+    QJsonValue id;
+    QJsonValue result;
+
+    bool error {false};
     RpcErrors code;
     QString messsage;
 
-    explicit ErrorAnswer(RpcErrors code, QString message)
+    Answer() {}
+
+    Answer(bool isError)
     {
-        this->code = code;
-        this->messsage = message;
+        error = !isError;
     }
 };
 
@@ -34,15 +39,10 @@ struct RpcRequest
     QString method;
     QVariantMap paramsMap;
     QVariantList paramsList;
-    QVariant id {0};
+    QJsonValue id {0};
 
     RpcErrors parseError {RpcErrors::NoError};
     QString errorString;
-
-    ErrorAnswer errorAnswer()
-    {
-        return ErrorAnswer(parseError, errorString);
-    }
 };
 
 class JsonParser : public QObject
@@ -52,6 +52,7 @@ public:
     explicit JsonParser(QObject *parent = nullptr);
 
     static QList<RpcRequest> parseRequest(QByteArray request);
+    static QByteArray parseAnswerJson(QList<Answer> answersList);
 
 private:
     static RpcRequest parseSingleRequest(QJsonValue request);

@@ -37,6 +37,48 @@ QList<RpcRequest> JsonParser::parseRequest(QByteArray request)
     return parsedRequests;
 }
 
+QByteArray JsonParser::parseAnswerJson(QList<Answer> answersList)
+{
+    QJsonArray answerArray;
+    foreach (Answer answer, answersList)
+    {
+        QJsonObject answerJson
+            {
+                {"jsonrpc", "2.0"}
+            };
+
+        if (answer.error)
+        {
+            answerJson.insert("error", QJsonObject
+                              {
+                                  {"code", answer.code},
+                                  {"message", answer.messsage}
+                              });
+            answerJson.insert("id", QJsonValue::Null);
+        }
+        else if (!answer.id.isUndefined())
+        {
+            answerJson.insert("result", answer.result);
+            answerJson.insert("id",     answer.id);
+        }
+
+        answerArray.append(answerJson);
+    }
+
+    if (answerArray.size() > 1)
+    {
+        return QJsonDocument(answerArray).toJson();
+    }
+    else if (answerArray.size() > 0)
+    {
+        return QJsonDocument(answerArray.first().toObject()).toJson();
+    }
+    else
+    {
+        return QByteArray();
+    }
+}
+
 RpcRequest JsonParser::parseSingleRequest(QJsonValue request)
 {
     if (!request.isObject() || request.toObject().isEmpty())
@@ -55,7 +97,7 @@ RpcRequest JsonParser::parseSingleRequest(QJsonValue request)
         if (reqObject.value("jsonrpc").toString() == "2.0")
         {
             req.method = reqObject.value("method").toString();
-            req.id     = reqObject.value("id").toVariant();
+            req.id     = reqObject.value("id");
 
             if (reqObject.value("params").isArray())
             {

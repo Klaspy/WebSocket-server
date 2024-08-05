@@ -12,6 +12,7 @@ class Server : public QObject
     Q_OBJECT
 public:
     explicit Server(QObject *parent = nullptr);
+    ~Server();
 
 private slots:
     void onNewConnection();
@@ -20,6 +21,7 @@ private slots:
 private:
     QList<QPointer<Connection>> connects;
     QWebSocketServer *m_server;
+    QPointer<Worker> m_worker;
 };
 
 #endif // SERVER_H

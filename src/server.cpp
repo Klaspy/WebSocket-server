@@ -15,11 +15,21 @@ Server::Server(QObject *parent) :
     }
 
     connect(m_server, &QWebSocketServer::newConnection, this, &Server::onNewConnection);
+
+    m_worker = new Worker();
+}
+
+Server::~Server()
+{
+    if (!m_worker.isNull())
+    {
+        m_worker->deleteLater();
+    }
 }
 
 void Server::onNewConnection()
 {
-    QPointer<Connection> connection = new Connection(m_server->nextPendingConnection());
+    QPointer<Connection> connection = new Connection(m_server->nextPendingConnection(), m_worker);
 
     connect(connection, &Connection::disconnected, this, &Server::removeConnection);
 
