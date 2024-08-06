@@ -60,7 +60,7 @@ public:
     static QByteArray parseAnswerJson(QList<Answer> answersList);
 
     static QList<QPointer<GuidedObject>> getGuidedObjects();
-    static void saveGuidedObjects(QList<GuidedObject*> objects);
+    static void saveGuidedObjects(QList<QPointer<GuidedObject>> objects);
 
 private:
     static RpcRequest parseSingleRequest(QJsonValue request);

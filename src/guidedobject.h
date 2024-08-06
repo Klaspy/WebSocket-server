@@ -15,7 +15,7 @@ class GuidedObject : public QObject
 public:
     explicit GuidedObject(QObject *parent = nullptr);
     explicit GuidedObject(QString name, QObject *parent = nullptr);
-    explicit GuidedObject(QString name, QString createDT, QByteArray id, QVariantMap customProperties, QObject *parent = nullptr);
+    explicit GuidedObject(QString name, QString createDT, QByteArray id,  QObject *parent = nullptr);
 
     QString name() const;
     void setName(const QString &newName);
