@@ -6,6 +6,11 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonParseError>
+#include <QFile>
+#include <QCoreApplication>
+#include <QPointer>
+
+#include "guidedobject.h"
 
 enum RpcErrors
 {
@@ -53,6 +58,9 @@ public:
 
     static QList<RpcRequest> parseRequest(QByteArray request);
     static QByteArray parseAnswerJson(QList<Answer> answersList);
+
+    static QList<QPointer<GuidedObject>> getGuidedObjects();
+    static void saveGuidedObjects(QList<GuidedObject*> objects);
 
 private:
     static RpcRequest parseSingleRequest(QJsonValue request);

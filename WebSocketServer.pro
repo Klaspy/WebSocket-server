@@ -9,7 +9,9 @@ CONFIG += c++17 cmdline
 SOURCES += \
         main.cpp \
         src/connection.cpp \
+        src/guidedobject.cpp \
         src/jsonparser.cpp \
+        src/manager.cpp \
         src/server.cpp \
         src/worker.cpp
 
@@ -20,6 +22,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     src/connection.h \
+    src/guidedobject.h \
     src/jsonparser.h \
+    src/manager.h \
     src/server.h \
     src/worker.h

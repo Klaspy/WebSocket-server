@@ -4,8 +4,10 @@
 #include <QObject>
 #include <QWebSocketServer>
 #include <QWebSocket>
+#include <QCoreApplication>
 
 #include "connection.h"
+#include "worker.h"
 
 class Server : public QObject
 {
@@ -22,6 +24,7 @@ private:
     QList<QPointer<Connection>> connects;
     QWebSocketServer *m_server;
     QPointer<Worker> m_worker;
+    QPointer<QThread> workerThread;
 };
 
 #endif // SERVER_H

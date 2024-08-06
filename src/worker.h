@@ -2,8 +2,10 @@
 #define WORKER_H
 
 #include <QObject>
+#include <QMetaObject>
 
 #include "jsonparser.h"
+#include "connection.h"
 
 class Worker : public QObject
 {
@@ -11,12 +13,11 @@ class Worker : public QObject
 public:
     explicit Worker(QObject *parent = nullptr);
 
-    QByteArray processRequest(QByteArray request);
-
-private:
-    QVariantMap methods;
+public slots:
+    void processRequest(QByteArray request);
 
 signals:
+
 };
 
 #endif // WORKER_H

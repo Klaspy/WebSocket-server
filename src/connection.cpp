@@ -1,20 +1,26 @@
 #include "connection.h"
 
-Connection::Connection(QPointer<QWebSocket> socket, Worker *worker, QObject *parent) :
+Connection::Connection(QPointer<QWebSocket> socket, QObject *parent) :
     QObject  {parent},
     m_socket {socket}
 {
     qDebug() << m_socket << m_socket->state();
 
-    m_worker = worker;
-
     connect(m_socket, &QWebSocket::disconnected,          this, &Connection::disconnected);
     connect(m_socket, &QWebSocket::binaryMessageReceived, this, &Connection::onBinaryMessage);
+}
+
+void Connection::sendBinaryMessage(QByteArray message)
+{
+    if (m_socket->state() == QAbstractSocket::ConnectedState)
+    {
+        m_socket->sendBinaryMessage(message);
+    }
 }
 
 void Connection::onBinaryMessage(const QByteArray &message)
 {
     qDebug() << "messsage" << message;
 
-    m_socket->sendBinaryMessage(m_worker->processRequest(message));
+    emit binaryMessage(message);
 }

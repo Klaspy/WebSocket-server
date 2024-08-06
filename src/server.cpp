@@ -17,6 +17,9 @@ Server::Server(QObject *parent) :
     connect(m_server, &QWebSocketServer::newConnection, this, &Server::onNewConnection);
 
     m_worker = new Worker();
+    workerThread = new QThread(this);
+    workerThread->start();
+    m_worker->moveToThread(workerThread);
 }
 
 Server::~Server()
@@ -25,13 +28,26 @@ Server::~Server()
     {
         m_worker->deleteLater();
     }
+
+    if (!workerThread.isNull())
+    {
+        workerThread->quit();
+        while(workerThread->isRunning())
+        {
+            this->thread()->msleep(1);
+            QCoreApplication::processEvents();
+        }
+
+        workerThread->deleteLater();
+    }
 }
 
 void Server::onNewConnection()
 {
-    QPointer<Connection> connection = new Connection(m_server->nextPendingConnection(), m_worker);
+    QPointer<Connection> connection = new Connection(m_server->nextPendingConnection(), this);
 
     connect(connection, &Connection::disconnected, this, &Server::removeConnection);
+    connect(connection, &Connection::binaryMessage, m_worker, &Worker::processRequest);
 
     connects.append(connection);
 }

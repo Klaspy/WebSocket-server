@@ -3,11 +3,16 @@
 Worker::Worker(QObject *parent)
     : QObject{parent}
 {
-    methods.insert("test", QVariant());
 }
 
-QByteArray Worker::processRequest(QByteArray request)
+void Worker::processRequest(QByteArray request)
 {
+    QPointer<Connection> conn = qobject_cast<Connection*>(sender());
+    if (conn.isNull())
+    {
+        return;
+    }
+
     QList<RpcRequest> parsedRequests = JsonParser::parseRequest(request);
 
     QList<Answer> answersList;
@@ -22,7 +27,31 @@ QByteArray Worker::processRequest(QByteArray request)
 
             answersList.append(answer);
         }
-        else if (!methods.contains(request.method))
+        else if (request.method == "getAll")
+        {
+            if (!request.paramsList.isEmpty() && !request.paramsMap.isEmpty())
+            {
+                Answer answer(false);
+                answer.code = RpcErrors::InvalidParams;
+                answer.messsage = "Invalid parameters";
+
+                answersList.append(answer);
+            }
+
+            else if (!request.id.isNull())
+            {
+                Answer answer(true);
+                answer.result = QJsonObject
+                    {
+                        {"something", "Офигеть, он смог"}
+                    };
+
+                answer.id = request.id;
+
+                answersList.append(answer);
+            }
+        }
+        else
         {
             Answer answer(false);
             answer.code = RpcErrors::InvalidRequest;
@@ -30,33 +59,11 @@ QByteArray Worker::processRequest(QByteArray request)
 
             answersList.append(answer);
         }
-        else
-        {
-            if (request.method == "test")
-            {
-                if (request.paramsList.isEmpty())
-                {
-                    Answer answer(false);
-                    answer.code = RpcErrors::InvalidParams;
-                    answer.messsage = "Invalid parameters";
-
-                    answersList.append(answer);
-                }
-                else if (!request.id.isNull())
-                {
-                    Answer answer(true);
-                    answer.result = QJsonObject
-                        {
-                            {"something", "Офигеть, он смог"}
-                        };
-
-                    answer.id = request.id;
-
-                    answersList.append(answer);
-                }
-            }
-        }
     }
 
-    return JsonParser::parseAnswerJson(answersList);
+    if (!answersList.isEmpty())
+    {
+        QMetaObject::invokeMethod(sender(), "sendBinaryMessage", Qt::QueuedConnection,
+                                  Q_ARG(QByteArray, JsonParser::parseAnswerJson(answersList)));
+    }
 }

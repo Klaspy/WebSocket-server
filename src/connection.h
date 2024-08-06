@@ -6,14 +6,15 @@
 #include <QThread>
 #include <QPointer>
 
-#include "worker.h"
 
 class Connection : public QObject
 {
     Q_OBJECT
 public:
-    explicit Connection(QPointer<QWebSocket> socket, Worker* worker, QObject *parent = nullptr);
+    explicit Connection(QPointer<QWebSocket> socket, QObject *parent = nullptr);
 
+public slots:
+    void sendBinaryMessage(QByteArray message);
 
 private slots:
     void onBinaryMessage(const QByteArray &message);
@@ -22,10 +23,10 @@ private:
     void moveToNewThread();
 
     QPointer<QWebSocket> m_socket;
-    QPointer<Worker> m_worker;
 
 signals:
     void disconnected();
+    void binaryMessage(QByteArray message);
 };
 
 #endif // CONNECTION_H

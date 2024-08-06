@@ -79,6 +79,85 @@ QByteArray JsonParser::parseAnswerJson(QList<Answer> answersList)
     }
 }
 
+QList<QPointer<GuidedObject>> JsonParser::getGuidedObjects()
+{
+    QFile file(QCoreApplication::applicationDirPath() + "/autosave.json");
+    file.open(QIODevice::ReadOnly);
+    QJsonArray objectsArray = QJsonDocument::fromJson(file.readAll()).array();
+    file.close();
+
+    QList<QPointer<GuidedObject>> objects;
+    QList<QByteArray> parents;
+
+    foreach(QJsonValue objectVal, objectsArray)
+    {
+        QJsonObject obj = objectVal.toObject();
+        GuidedObject *object = new GuidedObject(obj.value("name").toString(), obj.value("create date time").toString(),
+                                                QByteArray::fromHex(obj.value("id").toString().toUtf8()));
+        parents.append(obj.value("parent").toString().toUtf8());
+        obj.remove("name");
+        obj.remove("create date time");
+        obj.remove("id");
+        obj.remove("parent");
+        foreach (QString key, obj.keys())
+        {
+            object->setProperty(key.toUtf8(), obj.value(key).toVariant());
+        }
+
+        objects.append(object);
+    }
+
+    for (int i = 0; i < objects.size(); i++)
+    {
+        if (parents.at(i) != "")
+        {
+            foreach (GuidedObject *object, objects)
+            {
+                if (object == parents.at(i))
+                {
+                    objects[i]->setParent(object);
+                }
+            }
+        }
+    }
+
+    return objects;
+}
+
+void JsonParser::saveGuidedObjects(QList<QPointer<GuidedObject>> objects)
+{
+    QJsonArray objectsArray;
+
+    foreach (GuidedObject *object, objects)
+    {
+        if (object == nullptr)
+        {
+            continue;
+        }
+        QJsonObject obj;
+        obj.insert("name", object->name());
+        obj.insert("create date time", object->createDT());
+        obj.insert("id", QString(object->id().toHex()));
+        GuidedObject *parent = qobject_cast<GuidedObject*>(object->parent());
+        if (parent != nullptr)
+        {
+            obj.insert("parent", QString(parent->id().toHex()));
+        }
+
+        foreach (const QByteArray &name, object->dynamicPropertyNames())
+        {
+            obj.insert(QString(name), QJsonValue::fromVariant(object->property(name)));
+        }
+
+        objectsArray.append(obj);
+    }
+
+    QFile file(QCoreApplication::applicationDirPath() + "/autosave.json");
+    file.open(QIODevice::WriteOnly);
+    file.write(QJsonDocument(objectsArray).toJson(QJsonDocument::Indented));
+    file.close();
+}
+
 RpcRequest JsonParser::parseSingleRequest(QJsonValue request)
 {
     if (!request.isObject() || request.toObject().isEmpty())
