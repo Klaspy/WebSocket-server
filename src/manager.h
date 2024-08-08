@@ -11,7 +11,6 @@ class Manager : public QObject
     Q_OBJECT
 public:
     explicit Manager(QObject *parent = nullptr);
-    ~Manager();
 
     QList<QPair<QString, QByteArray>> getAll();
 
@@ -22,7 +21,7 @@ public:
     bool        renameObject(QByteArray id, QString name);
     QVariant    getCustomProperty(QByteArray id, QString propertyName);
     int         setCustomProperty(QByteArray id, QString propertyName, QVariant value);
-    int         setParent(QByteArray objectId, QByteArray parentId);
+    int         setParent(QByteArray objectId, QVariant parentId_);
 
 private:
     QList<QPointer<GuidedObject>> objects;

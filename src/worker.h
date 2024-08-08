@@ -6,6 +6,7 @@
 
 #include "jsonparser.h"
 #include "connection.h"
+#include "manager.h"
 
 class Worker : public QObject
 {
@@ -15,6 +16,11 @@ public:
 
 public slots:
     void processRequest(QByteArray request);
+
+private:
+    Answer invalidParamsAnswer();
+
+    QPointer<Manager> manager {nullptr};
 
 signals:
 

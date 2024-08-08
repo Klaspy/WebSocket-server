@@ -11,6 +11,8 @@ GuidedObject::GuidedObject(QString name, QObject *parent)
     : QObject{parent}
 {
     m_name = name;
+    m_createDT = QDateTime::currentDateTime().toString();
+    m_id = QByteArray::fromHex(QString::number(QDateTime::currentDateTime().toMSecsSinceEpoch(), 16).toUtf8());
 }
 
 GuidedObject::GuidedObject(QString name, QString createDT, QByteArray id, QObject *parent)
@@ -54,9 +56,4 @@ QVariantMap GuidedObject::getCustomProperties()
     }
 
     return customPropertiesMap;
-}
-
-bool GuidedObject::operator ==(const QByteArray &id) const
-{
-    return m_id == id;
 }

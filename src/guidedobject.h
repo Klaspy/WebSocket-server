@@ -26,8 +26,6 @@ public:
 
     QVariantMap getCustomProperties();
 
-    bool operator ==(const QByteArray &id) const;
-
 private:
     QString m_name;
     QString m_createDT;
